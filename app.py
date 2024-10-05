@@ -1,4 +1,5 @@
 import requests
+import re
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
@@ -92,20 +93,25 @@ def create_template():
         }
         data["whatsapp"]["templates"][0]["template"]["components"][1]["cards"].append(card_data)
 
+    # Determine the API URL based on account_id format using regex
+    if re.search(r'\d+m$', account_id):  # Matches any digits followed by 'm' at the end
+        api_url = f"https://api.in.exotel.com/v2/accounts/{account_id}/templates?waba_id={waba_id}"
+    else:
+        api_url = f"https://api.exotel.com/v2/accounts/{account_id}/templates?waba_id={waba_id}"
+
     # Print the request data for debugging
     print("Request data being sent to Exotel:")
-    print("API URL:", f"https://{username}:{password}@api.exotel.com/v2/accounts/{account_id}/templates?waba_id={waba_id}")
+    print("API URL:", api_url)
     print("Payload:", data)
 
     # Make API request to Exotel
-    api_url = f"https://{username}:{password}@api.exotel.com/v2/accounts/{account_id}/templates?waba_id={waba_id}"
-    response = requests.post(api_url, json=data)
+    response = requests.post(api_url, json=data, auth=(username, password))
 
     # Check the response and return it to the user
     if response.ok:
         return jsonify({"status": "success", "data": response.json()})
     else:
         return jsonify({"status": "error", "message": response.text}), response.status_code
-    
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
