@@ -1,2 +1,2 @@
-web: python3 app.py
+web: gunicorn app:app
 build: echo "No build step required"
