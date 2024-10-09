@@ -8,19 +8,23 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+        }
         body {
             background-color: #f4f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         h1 {
             margin-bottom: 30px;
-            color: #007bff;
+            color: var(--primary-color);
             text-align: center;
             font-weight: bold;
             text-transform: uppercase;
         }
         .card {
-            border: 1px solid #007bff;
+            border: 1px solid var(--primary-color);
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
@@ -29,24 +33,16 @@
             transform: scale(1.02);
         }
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
             transition: background-color 0.3s;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .footer {
-            margin-top: 50px;
-            text-align: center;
-            padding: 20px;
-            background-color: #007bff;
-            color: white;
-            position: relative;
+            background-color: var(--primary-hover);
         }
         .example-container {
             background-color: #e9ecef;
-            border: 1px dashed #007bff;
+            border: 1px dashed var(--primary-color);
             padding: 10px;
             border-radius: 5px;
             margin-top: 10px;
@@ -55,15 +51,97 @@
             font-weight: bold;
         }
         .border {
-            border: 1px solid #007bff;
+            border: 1px solid var(--primary-color);
             border-radius: 5px;
             padding: 15px;
             background-color: #ffffff;
             margin-bottom: 10px;
         }
     </style>
+</head>
+<body>
+
+    <header class="container">
+        <h1>Carousel Template Creator</h1>
+    </header>
+    
+    <main class="container">
+        <form action="/create_template" method="POST">
+            <fieldset>
+                <legend>API Credentials</legend>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label>Account SID:</label>
+                        <input type="text" class="form-control" name="account_id" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>WABA ID:</label>
+                        <input type="text" class="form-control" name="waba_id" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label>API Key:</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>API Token:</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Template Details</legend>
+                <div class="form-group">
+                    <label>Template Name:</label>
+                    <input type="text" class="form-control" name="template_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Language:</label>
+                    <select class="form-control" name="language" required id="languageDropdown"></select>
+                </div>
+                <div class="form-group">
+                    <label>Category (use MARKETING, UTILITY, AUTHENTICATION):</label>
+                    <input type="text" class="form-control" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label>Main Body Text (use {1}, {2}, etc. for dynamic content):</label>
+                    <textarea class="form-control" name="main_body_text" oninput="showMainBodyExamples(this.value)" required></textarea>
+                </div>
+                <div id="main_body_example" class="example-container"></div>
+                <div class="form-group">
+                    <label>Number of Cards:</label>
+                    <input type="number" class="form-control" id="num_cards" name="num_cards" min="1" max="10" required>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addCard()">Add Card</button>
+                <div id="cards"></div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Create Template</button>
+            </fieldset>
+        </form>
+    </main>
+
+    <div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="responseModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="responseModalLabel">Response</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <pre></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>    
+
     <script>
-const validLanguages = [
+        const validLanguages = [
             {name: "Afrikaans", code: "af"},
             {name: "Albanian", code: "sq"},
             {name: "Arabic", code: "ar"},
@@ -120,191 +198,23 @@ const validLanguages = [
             {name: "Serbian", code: "sr"},
             {name: "Slovak", code: "sk"},
             {name: "Slovenian", code: "sl"},
-            {name: "Spanish", code: "es"},
-            {name: "Spanish (ARG)", code: "es_AR"},
-            {name: "Spanish (SPA)", code: "es_ES"},
-            {name: "Spanish (MEX)", code: "es_MX"},
+            {name: "Spanish (ES)", code: "es"},
+            {name: "Spanish (LA)", code: "es_LA"},
             {name: "Swahili", code: "sw"},
             {name: "Swedish", code: "sv"},
+            {name: "Tajik", code: "tg"},
             {name: "Tamil", code: "ta"},
             {name: "Telugu", code: "te"},
             {name: "Thai", code: "th"},
             {name: "Turkish", code: "tr"},
             {name: "Ukrainian", code: "uk"},
             {name: "Urdu", code: "ur"},
-            {name: "Uzbek", code: "uz"},
             {name: "Vietnamese", code: "vi"},
+            {name: "Welsh", code: "cy"},
+            {name: "Xhosa", code: "xh"},
+            {name: "Yoruba", code: "yo"},
             {name: "Zulu", code: "zu"}
         ];
-
-        function extractDynamicPlaceholders(text) {
-            const regex = /{(\d+)}/g;
-            const placeholders = [];
-            let match;
-
-            while ((match = regex.exec(text)) !== null) {
-                placeholders.push(match[1]);
-            }
-            return placeholders;
-        }
-
-        function addCard() {
-            const cardsDiv = document.getElementById('cards');
-            const cardIndex = cardsDiv.children.length;
-
-            const cardHtml = `
-                <div class="card my-3">
-                    <div class="card-header">Card ${cardIndex + 1} <button type="button" class="close" onclick="removeCard(this)">&times;</button></div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Image Handle:</label>
-                            <input type="text" class="form-control" name="image_handle_${cardIndex}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Body Text (use {1}, {2}, etc. for dynamic content):</label>
-                            <textarea class="form-control" name="card_body_text_${cardIndex}" oninput="showCardExamples(${cardIndex}, this.value)" required></textarea>
-                        </div>
-                        <div id="card_example_${cardIndex}" class="example-container"></div>
-                        <div class="form-group">
-                            <label>Number of Buttons (max 2):</label>
-                            <input type="number" class="form-control" name="num_buttons_${cardIndex}" min="1" max="2" onchange="addButtons(${cardIndex}, this.value)" required>
-                        </div>
-                        <div id="buttons_${cardIndex}"></div>
-                    </div>
-                </div>
-            `;
-            cardsDiv.insertAdjacentHTML('beforeend', cardHtml);
-        }
-
-        function removeCard(button) {
-            button.closest('.card').remove();
-        }
-
-        function showCardExamples(cardIndex, bodyText) {
-            const exampleContainer = document.getElementById(`card_example_${cardIndex}`);
-            const placeholders = extractDynamicPlaceholders(bodyText);
-            exampleContainer.innerHTML = ''; // Clear existing examples
-
-            placeholders.forEach((placeholder) => {
-                exampleContainer.innerHTML += `
-                    <div class="form-group">
-                        <label>Example for {${placeholder}}:</label>
-                        <input type="text" class="form-control" name="card_example_${cardIndex}_${placeholder}" required>
-                    </div>
-                `;
-            });
-        }
-
-        function addButtons(cardIndex, numButtons) {
-            const buttonsDiv = document.getElementById(`buttons_${cardIndex}`);
-            buttonsDiv.innerHTML = '';  // Clear existing buttons
-            for (let i = 0; i < numButtons; i++) {
-                const buttonHtml = `
-                    <div class="border p-2 my-2">
-                        <h5>Button ${i + 1}</h5>
-                        <div class="form-group">
-                            <label>Button Type:</label>
-                            <select class="form-control" name="button_type_${cardIndex}_${i}" onchange="toggleButtonDetails(${cardIndex}, ${i}, this.value)">
-                                <option value="">Select Type</option>
-                                <option value="QUICK_REPLY">Quick Reply</option>
-                                <option value="URL">URL</option>
-                                <option value="PHONE_NUMBER">Phone Number</option>
-                                <option value="OTP">OTP</option>
-                                <option value="MPM">MPM</option>
-                                <option value="CATALOG">Catalog</option>
-                                <option value="FLOW">Flow</option>
-                                <option value="VOICE_CALL">Voice Call</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Button Text:</label>
-                            <input type="text" class="form-control" name="button_text_${cardIndex}_${i}" required>
-                        </div>
-                        <div id="button_details_${cardIndex}_${i}" style="display:none;"></div>
-                    </div>
-                `;
-                buttonsDiv.insertAdjacentHTML('beforeend', buttonHtml);
-            }
-        }
-
-        function toggleButtonDetails(cardIndex, buttonIndex, buttonType) {
-            const detailsDiv = document.getElementById(`button_details_${cardIndex}_${buttonIndex}`);
-            detailsDiv.innerHTML = '';  // Clear existing details
-
-            const inputs = {
-                URL: `<label>URL:</label><input type="text" class="form-control" name="button_url_${cardIndex}_${buttonIndex}" required>`,
-                PHONE_NUMBER: `<label>Phone Number:</label><input type="text" class="form-control" name="button_phone_number_${cardIndex}_${buttonIndex}" required>`,
-                OTP: `<label>OTP Code:</label><input type="text" class="form-control" name="button_otp_code_${cardIndex}_${buttonIndex}" required>`,
-                MPM: `<label>MPM Payload:</label><input type="text" class="form-control" name="button_mpm_payload_${cardIndex}_${buttonIndex}" required>`,
-                CATALOG: `<label>Catalog ID:</label><input type="text" class="form-control" name="button_catalog_id_${cardIndex}_${buttonIndex}" required>`,
-                FLOW: `<label>Flow ID:</label><input type="text" class="form-control" name="button_flow_id_${cardIndex}_${buttonIndex}" required>`,
-                VOICE_CALL: `<label>Voice Call Number:</label><input type="text" class="form-control" name="button_voice_call_number_${cardIndex}_${buttonIndex}" required>`
-            };
-
-            if (inputs[buttonType]) {
-                detailsDiv.innerHTML = inputs[buttonType];
-                detailsDiv.style.display = 'block';
-            } else {
-                detailsDiv.style.display = 'none';
-            }
-        }
-
-        function showResponseModal(response) {
-            $('#responseModal .modal-body pre').text(JSON.stringify(response, null, 2));
-            $('#responseModal').modal('show');
-        }
-        function extractDynamicPlaceholders(text) {
-        const regex = /{(\d+)}/g;
-        const placeholders = [];
-        let match;
-
-        while ((match = regex.exec(text)) !== null) {
-            placeholders.push(match[1]);
-        }
-        return placeholders;
-    }
-
-    function showMainBodyExamples(bodyText) {
-        const exampleContainer = document.getElementById('main_body_example');
-        const placeholders = extractDynamicPlaceholders(bodyText);
-        exampleContainer.innerHTML = ''; // Clear existing examples
-
-        placeholders.forEach((placeholder) => {
-            exampleContainer.innerHTML += `
-                <div class="form-group">
-                    <label>Example for {${placeholder}}:</label>
-                    <input type="text" class="form-control" name="main_body_example_${placeholder}" required>
-                </div>
-            `;
-        });
-    }
-    $(document).ready(function() {
-        const languageDropdown = $('#languageDropdown');
-        validLanguages.forEach(lang => {
-            languageDropdown.append(new Option(lang.name, lang.code));
-        });
-
-        $('form').on('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function(response) {
-                    showResponseModal(response);
-                },
-                error: function(error) {
-                    showResponseModal(error.responseJSON);
-                }
-            });
-        });
-    });
-
-    function showResponseModal(response) {
-        $('#responseModal .modal-body pre').text(JSON.stringify(response, null, 2));
-        $('#responseModal').modal('show');
-    }
 
         $(document).ready(function() {
             const languageDropdown = $('#languageDropdown');
@@ -313,8 +223,7 @@ const validLanguages = [
             });
 
             $('form').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
-
+                e.preventDefault();
                 $.ajax({
                     type: 'POST',
                     url: $(this).attr('action'),
@@ -328,77 +237,33 @@ const validLanguages = [
                 });
             });
         });
-    </script>
-</head>
-<body>
 
-    <div class="container">
-        <h1>Carousel Template Creator</h1>
-        <form action="/create_template" method="POST">
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label>Account SID:</label>
-                    <input type="text" class="form-control" name="account_id" required>
-                </div>
-                <div class="form-group col-md-6">
-                    <label>WABA ID:</label>
-                    <input type="text" class="form-control" name="waba_id" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label>API Key:</label>
-                    <input type="text" class="form-control" name="username" required>
-                </div>
-                <div class="form-group col-md-6">
-                    <label>API Token:</label>
-                    <input type="password" class="form-control" name="password" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Template Name:</label>
-                <input type="text" class="form-control" name="template_name" required>
-            </div>
-            <div class="form-group">
-                <label>Language:</label>
-                <select class="form-control" name="language" required id="languageDropdown"></select>
-            </div>
-            <div class="form-group">
-                <label>Category (use MARKETING, UTILITY, AUTHENTICATION):</label>
-                <input type="text" class="form-control" name="category" required>
-            </div>
-            <div class="form-group">
-                <label>Main Body Text (use {1}, {2}, etc. for dynamic content):</label>
-                <textarea class="form-control" name="main_body_text" oninput="showMainBodyExamples(this.value)" required></textarea>
-            </div>
-            <div id="main_body_example" class="example-container"></div>
-            <div class="form-group">
-                <label>Number of Cards:</label>
-                <input type="number" class="form-control" id="num_cards" name="num_cards" min="1" max="10" required>
-            </div>
-            <button type="button" class="btn btn-secondary" onclick="addCard()">Add Card</button>
-            <div id="cards"></div>
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Create Template</button>
-        </form>
-    </div>
-    <div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="responseModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="responseModalLabel">Response</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <pre></pre>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>    
+        function addCard() {
+            const cardCount = $('#cards .card').length;
+            if (cardCount < 10) {
+                $('#cards').append(`
+                    <div class="card border">
+                        <div class="form-group">
+                            <label>Card ${cardCount + 1} Text:</label>
+                            <textarea class="form-control" name="card_text_${cardCount + 1}" required></textarea>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="$(this).closest('.card').remove()">Remove Card</button>
+                    </div>
+                `);
+            } else {
+                alert('Maximum of 10 cards allowed.');
+            }
+        }
+
+        function showMainBodyExamples(value) {
+            $('#main_body_example').text(`Example: ${value.replace(/{(\d+)}/g, "Value $1")}`);
+        }
+
+        function showResponseModal(response) {
+            $('#responseModal .modal-body pre').text(JSON.stringify(response, null, 2));
+            $('#responseModal').modal('show');
+        }
+    </script>
 
 </body>
 </html>
