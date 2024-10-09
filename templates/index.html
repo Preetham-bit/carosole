@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carousel Template Creator</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         :root {
             --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --background-color: #f8f9fa;
-            --card-bg-color: #ffffff;
-            --hover-color: #0056b3;
+            --primary-hover: #0056b3;
         }
         body {
-            background-color: var(--background-color);
-            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         h1 {
             margin-bottom: 30px;
@@ -30,12 +26,11 @@
         .card {
             border: 1px solid var(--primary-color);
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
         }
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transform: scale(1.02);
         }
         .btn-primary {
             background-color: var(--primary-color);
@@ -43,7 +38,7 @@
             transition: background-color 0.3s;
         }
         .btn-primary:hover {
-            background-color: var(--hover-color);
+            background-color: var(--primary-hover);
         }
         .example-container {
             background-color: #e9ecef;
@@ -59,11 +54,8 @@
             border: 1px solid var(--primary-color);
             border-radius: 5px;
             padding: 15px;
-            background-color: var(--card-bg-color);
+            background-color: #ffffff;
             margin-bottom: 10px;
-        }
-        .spinner-border {
-            display: none;
         }
     </style>
 </head>
@@ -74,7 +66,7 @@
     </header>
     
     <main class="container">
-        <form id="templateForm" action="/create_template" method="POST">
+        <form action="/create_template" method="POST">
             <fieldset>
                 <legend>API Credentials</legend>
                 <div class="form-row">
@@ -125,9 +117,6 @@
                 <button type="button" class="btn btn-secondary" onclick="addCard()">Add Card</button>
                 <div id="cards"></div>
                 <button type="submit" class="btn btn-primary btn-lg btn-block">Create Template</button>
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
             </fieldset>
         </form>
     </main>
@@ -183,20 +172,30 @@
             {name: "Hindi", code: "hi"},
             {name: "Hungarian", code: "hu"},
             {name: "Indonesian", code: "id"},
+            {name: "Irish", code: "ga"},
             {name: "Italian", code: "it"},
             {name: "Japanese", code: "ja"},
+            {name: "Kannada", code: "kn"},
+            {name: "Kazakh", code: "kk"},
+            {name: "Kinyarwanda", code: "rw_RW"},
             {name: "Korean", code: "ko"},
+            {name: "Kyrgyz (Kyrgyzstan)", code: "ky_KG"},
+            {name: "Lao", code: "lo"},
             {name: "Latvian", code: "lv"},
             {name: "Lithuanian", code: "lt"},
+            {name: "Macedonian", code: "mk"},
             {name: "Malay", code: "ms"},
-            {name: "Maltese", code: "mt"},
-            {name: "Norwegian", code: "no"},
+            {name: "Malayalam", code: "ml"},
+            {name: "Marathi", code: "mr"},
+            {name: "Norwegian", code: "nb"},
             {name: "Persian", code: "fa"},
             {name: "Polish", code: "pl"},
             {name: "Portuguese (BR)", code: "pt_BR"},
-            {name: "Portuguese (PT)", code: "pt_PT"},
+            {name: "Portuguese (POR)", code: "pt_PT"},
+            {name: "Punjabi", code: "pa"},
             {name: "Romanian", code: "ro"},
             {name: "Russian", code: "ru"},
+            {name: "Serbian", code: "sr"},
             {name: "Slovak", code: "sk"},
             {name: "Slovenian", code: "sl"},
             {name: "Spanish (ES)", code: "es"},
@@ -225,7 +224,6 @@
 
             $('form').on('submit', function(e) {
                 e.preventDefault();
-                $('.spinner-border').show(); // Show loading spinner
                 $.ajax({
                     type: 'POST',
                     url: $(this).attr('action'),
@@ -235,9 +233,6 @@
                     },
                     error: function(error) {
                         showResponseModal(error.responseJSON);
-                    },
-                    complete: function() {
-                        $('.spinner-border').hide(); // Hide loading spinner
                     }
                 });
             });
@@ -247,7 +242,7 @@
             const cardCount = $('#cards .card').length;
             if (cardCount < 10) {
                 $('#cards').append(`
-                    <div class="card border animated">
+                    <div class="card border">
                         <div class="form-group">
                             <label>Card ${cardCount + 1} Text:</label>
                             <textarea class="form-control" name="card_text_${cardCount + 1}" required></textarea>
