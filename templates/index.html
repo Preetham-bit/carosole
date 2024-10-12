@@ -9,57 +9,64 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         body {
-            background-color: #f4f7fa;
+            background-color: #eef2f3;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         h1 {
             margin-bottom: 30px;
-            color: #007bff;
+            color: #6c63ff;
             text-align: center;
             font-weight: bold;
             text-transform: uppercase;
         }
         .card {
-            border: 1px solid #007bff;
+            border: 1px solid #6c63ff;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
+            background-color: #ffffff;
         }
         .card:hover {
             transform: scale(1.02);
         }
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: #6c63ff;
+            border-color: #5a54d1;
             transition: background-color 0.3s;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #5a54d1;
         }
         .footer {
             margin-top: 50px;
             text-align: center;
             padding: 20px;
-            background-color: #007bff;
+            background-color: #6c63ff;
             color: white;
             position: relative;
         }
         .example-container {
-            background-color: #e9ecef;
-            border: 1px dashed #007bff;
+            background-color: #f8f9fa;
+            border: 1px dashed #6c63ff;
             padding: 10px;
             border-radius: 5px;
             margin-top: 10px;
         }
         .form-group label {
             font-weight: bold;
+            color: #333;
         }
         .border {
-            border: 1px solid #007bff;
+            border: 1px solid #6c63ff;
             border-radius: 5px;
             padding: 15px;
-            background-color: #ffffff;
+            background-color: #f9f9f9;
             margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            background-color: #6c63ff;
+            color: white;
         }
     </style>
     <script>
@@ -137,7 +144,7 @@ const validLanguages = [
             {name: "Zulu", code: "zu"}
         ];
 
-        function extractDynamicPlaceholders(text) {
+function extractDynamicPlaceholders(text) {
             const regex = /{(\d+)}/g;
             const placeholders = [];
             let match;
@@ -152,7 +159,7 @@ const validLanguages = [
             const cardsDiv = document.getElementById('cards');
             const cardIndex = cardsDiv.children.length;
 
-            const cardHtml = 
+            const cardHtml = `
                 <div class="card my-3">
                     <div class="card-header">Card ${cardIndex + 1} <button type="button" class="close" onclick="removeCard(this)">&times;</button></div>
                     <div class="card-body">
@@ -172,7 +179,7 @@ const validLanguages = [
                         <div id="buttons_${cardIndex}"></div>
                     </div>
                 </div>
-            ;
+            `;
             cardsDiv.insertAdjacentHTML('beforeend', cardHtml);
         }
 
@@ -181,25 +188,25 @@ const validLanguages = [
         }
 
         function showCardExamples(cardIndex, bodyText) {
-            const exampleContainer = document.getElementById(card_example_${cardIndex});
+            const exampleContainer = document.getElementById(`card_example_${cardIndex}`);
             const placeholders = extractDynamicPlaceholders(bodyText);
             exampleContainer.innerHTML = ''; // Clear existing examples
 
             placeholders.forEach((placeholder) => {
-                exampleContainer.innerHTML += 
+                exampleContainer.innerHTML += `
                     <div class="form-group">
                         <label>Example for {${placeholder}}:</label>
                         <input type="text" class="form-control" name="card_example_${cardIndex}_${placeholder}" required>
                     </div>
-                ;
+                `;
             });
         }
 
         function addButtons(cardIndex, numButtons) {
-            const buttonsDiv = document.getElementById(buttons_${cardIndex});
+            const buttonsDiv = document.getElementById(`buttons_${cardIndex}`);
             buttonsDiv.innerHTML = '';  // Clear existing buttons
             for (let i = 0; i < numButtons; i++) {
-                const buttonHtml = 
+                const buttonHtml = `
                     <div class="border p-2 my-2">
                         <h5>Button ${i + 1}</h5>
                         <div class="form-group">
@@ -222,23 +229,23 @@ const validLanguages = [
                         </div>
                         <div id="button_details_${cardIndex}_${i}" style="display:none;"></div>
                     </div>
-                ;
+                `;
                 buttonsDiv.insertAdjacentHTML('beforeend', buttonHtml);
             }
         }
 
         function toggleButtonDetails(cardIndex, buttonIndex, buttonType) {
-            const detailsDiv = document.getElementById(button_details_${cardIndex}_${buttonIndex});
+            const detailsDiv = document.getElementById(`button_details_${cardIndex}_${buttonIndex}`);
             detailsDiv.innerHTML = '';  // Clear existing details
 
             const inputs = {
-                URL: <label>URL:</label><input type="text" class="form-control" name="button_url_${cardIndex}_${buttonIndex}" required>,
-                PHONE_NUMBER: <label>Phone Number:</label><input type="text" class="form-control" name="button_phone_number_${cardIndex}_${buttonIndex}" required>,
-                OTP: <label>OTP Code:</label><input type="text" class="form-control" name="button_otp_code_${cardIndex}_${buttonIndex}" required>,
-                MPM: <label>MPM Payload:</label><input type="text" class="form-control" name="button_mpm_payload_${cardIndex}_${buttonIndex}" required>,
-                CATALOG: <label>Catalog ID:</label><input type="text" class="form-control" name="button_catalog_id_${cardIndex}_${buttonIndex}" required>,
-                FLOW: <label>Flow ID:</label><input type="text" class="form-control" name="button_flow_id_${cardIndex}_${buttonIndex}" required>,
-                VOICE_CALL: <label>Voice Call Number:</label><input type="text" class="form-control" name="button_voice_call_number_${cardIndex}_${buttonIndex}" required>
+                URL: `<label>URL:</label><input type="text" class="form-control" name="button_url_${cardIndex}_${buttonIndex}" required>`,
+                PHONE_NUMBER: `<label>Phone Number:</label><input type="text" class="form-control" name="button_phone_number_${cardIndex}_${buttonIndex}" required>`,
+                OTP: `<label>OTP Code:</label><input type="text" class="form-control" name="button_otp_code_${cardIndex}_${buttonIndex}" required>`,
+                MPM: `<label>MPM Payload:</label><input type="text" class="form-control" name="button_mpm_payload_${cardIndex}_${buttonIndex}" required>`,
+                CATALOG: `<label>Catalog ID:</label><input type="text" class="form-control" name="button_catalog_id_${cardIndex}_${buttonIndex}" required>`,
+                FLOW: `<label>Flow ID:</label><input type="text" class="form-control" name="button_flow_id_${cardIndex}_${buttonIndex}" required>`,
+                VOICE_CALL: `<label>Voice Call Number:</label><input type="text" class="form-control" name="button_voice_call_number_${cardIndex}_${buttonIndex}" required>`
             };
 
             if (inputs[buttonType]) {
@@ -253,58 +260,6 @@ const validLanguages = [
             $('#responseModal .modal-body pre').text(JSON.stringify(response, null, 2));
             $('#responseModal').modal('show');
         }
-        function extractDynamicPlaceholders(text) {
-        const regex = /{(\d+)}/g;
-        const placeholders = [];
-        let match;
-
-        while ((match = regex.exec(text)) !== null) {
-            placeholders.push(match[1]);
-        }
-        return placeholders;
-    }
-
-    function showMainBodyExamples(bodyText) {
-        const exampleContainer = document.getElementById('main_body_example');
-        const placeholders = extractDynamicPlaceholders(bodyText);
-        exampleContainer.innerHTML = ''; // Clear existing examples
-
-        placeholders.forEach((placeholder) => {
-            exampleContainer.innerHTML += 
-                <div class="form-group">
-                    <label>Example for {${placeholder}}:</label>
-                    <input type="text" class="form-control" name="main_body_example_${placeholder}" required>
-                </div>
-            ;
-        });
-    }
-    $(document).ready(function() {
-        const languageDropdown = $('#languageDropdown');
-        validLanguages.forEach(lang => {
-            languageDropdown.append(new Option(lang.name, lang.code));
-        });
-
-        $('form').on('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function(response) {
-                    showResponseModal(response);
-                },
-                error: function(error) {
-                    showResponseModal(error.responseJSON);
-                }
-            });
-        });
-    });
-
-    function showResponseModal(response) {
-        $('#responseModal .modal-body pre').text(JSON.stringify(response, null, 2));
-        $('#responseModal').modal('show');
-    }
 
         $(document).ready(function() {
             const languageDropdown = $('#languageDropdown');
@@ -332,7 +287,7 @@ const validLanguages = [
 </head>
 <body>
 
-    <div class="container">
+    <div class="container mt-5">
         <h1>Carousel Template Creator</h1>
         <form action="/create_template" method="POST">
             <div class="form-row">
@@ -376,11 +331,12 @@ const validLanguages = [
                 <label>Number of Cards:</label>
                 <input type="number" class="form-control" id="num_cards" name="num_cards" min="1" max="10" required>
             </div>
-            <button type="button" class="btn btn-secondary" onclick="addCard()">Add Card</button>
+            <button type="button" class="btn btn-secondary mb-3" onclick="addCard()">Add Card</button>
             <div id="cards"></div>
             <button type="submit" class="btn btn-primary btn-lg btn-block">Create Template</button>
         </form>
     </div>
+
     <div class="modal fade" id="responseModal" tabindex="-1" role="dialog" aria-labelledby="responseModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
